@@ -1,72 +1,68 @@
 # Re-Use-Toolkit
 
-Das Re-Use-Toolkit ist ein browserbasiertes Werkzeug für die überschlägige Bewertung der Wiederverwendung von Bauteilen. Es richtet sich an deutschsprachige Nutzerinnen und Nutzer und bleibt bewusst als einzelne statische HTML-Datei ohne Build-Schritt umgesetzt.
+Das Re-Use-Toolkit ist ein leichtgewichtiges, browserbasiertes Werkzeug zur überschlägigen Bewertung der Wiederverwendung von Bauteilen. Es ist Teil der „SURAP Open Source Tools“ und bleibt bewusst als einzelne statische HTML-Datei ohne Build-Schritt umgesetzt.
 
-## Was das Werkzeug berechnet
+## Tool öffnen
 
-Das Werkzeug enthält zwei Rechner:
+[Tool testen](https://surap-tools.github.io/reuse-toolkit/)
 
-1. **CO₂-Ersparnis durch Wiederverwendung von Bauteilen**
-   Der Rechner schätzt, welche GWP-fossil-Emissionen aus der Neuproduktion vermieden werden, wenn ein gebrauchtes Bauteil wiederverwendet wird.
+## Was macht das Tool?
 
-2. **Transport-Break-even**
-   Der Rechner prüft, ab welcher einfachen Transportdistanz sich die Wiederverwendung eines gebrauchten Baustoffs oder Bauteils rechnerisch noch lohnt.
+Das Tool zeigt, welche Treibhausgasemissionen durch die Wiederverwendung ausgewählter Bauteile rechnerisch vermieden werden können. Zusätzlich kann abgeschätzt werden, bis zu welcher Transportdistanz die Wiederverwendung trotz Transportemissionen klimapositiv bleibt.
 
-## Demo-Daten und Datenqualität
+## Funktionen
 
-Alle aktuell enthaltenen Werte sind **Demo-Werte** in realistischer Größenordnung. Sie dürfen nicht als geprüfte oder verifizierte ÖKOBAUDAT-Werte verwendet werden.
+- Rechner für die CO₂-Ersparnis durch Wiederverwendung gegenüber einem Neukauf.
+- Transport-Break-even-Rechner für einfache Strecken oder Hin- und Rückfahrten.
+- Auswahl mehrerer Bauteilgruppen mit Mengenangabe je passender Einheit.
+- Anzeige der zugrunde gelegten Bauteilannahmen, Gesamtmasse und einfachen Ergebnisinterpretation.
+- Demo-Hinweis direkt im Tool sowie klar markierte Datenblöcke `COMPONENTS` und `TRANSPORT` im Quelltext.
 
-Das Repository muss privat bleiben, bis die Demo-Werte durch verifizierte ÖKOBAUDAT-Daten ersetzt wurden. Der Demo-Hinweis im Werkzeug sollte erst nach Datenprüfung und Freigabe zur Veröffentlichung entfernt werden.
+## Datenstatus
 
-## Demo-Daten ersetzen
+Die aktuellen Daten sind Demo-Daten in realistischer Größenordnung. Die Datenblöcke `COMPONENTS` und `TRANSPORT` sind im Quelltext entsprechend markiert.
 
-Alle Material- und Transportdaten liegen in `index.html` in zwei klar markierten JavaScript-Blöcken:
+Die aktuellen Werte dienen nur zu Demonstrations- und Testzwecken und dürfen nicht als geprüfte ÖKOBAUDAT-Werte interpretiert werden.
 
-- `COMPONENTS`
-- `TRANSPORT`
+Hinweis: Das Tool ist technisch bereits testbar. Vor einer öffentlichen fachlichen Nutzung müssen die Demo-Werte durch geprüfte Daten ersetzt und die Demo-Hinweise entfernt oder angepasst werden.
 
-Zum Ersetzen der Demo-Daten:
+## Datenquellen
 
-1. Den Block `COMPONENTS` mit geprüften Bauteil- und Materialkennwerten aktualisieren.
-2. Den Block `TRANSPORT` mit geprüften Transportkennwerten aktualisieren.
-3. Die Annahmen und Hinweise im Werkzeug fachlich prüfen.
-4. Erst nach Prüfung und Freigabe den Demo-Hinweis entfernen.
+Datenquellen müssen geprüft, versioniert und nachvollziehbar dokumentiert werden.
 
-## Wichtige Felder in `COMPONENTS`
+Wenn echte ÖKOBAUDAT-Daten eingesetzt werden, ist die Version zu ergänzen:
 
-- `gwpNew`: GWP-fossil A1–A3 des neuen Produkts pro Einheit, angegeben in kg CO₂-Äquivalent pro Einheit.
-- `mass`: Masse in kg pro Einheit. Dieser Wert wird für die Transportberechnung verwendet.
-- `unit`: Einheit, die in der Oberfläche angezeigt wird, z. B. `Stück`, `m²`, `m³` oder `lfm`.
-- `basis`: Kurze Annahme, die Nutzerinnen und Nutzern angezeigt wird, z. B. Abmessungen, Dicke oder Leistungsumfang.
+Datenquelle: ÖKOBAUDAT [Version eintragen], BMWSB/BBSR.
 
-## Annahme `REUSE_FACTOR`
+## Methodische Annahmen
 
-Im Werkzeug gilt aktuell:
+- Das Tool betrachtet eine überschlägige Vermeidung von GWP-fossil-Emissionen aus der Neuproduktion in A1–A3.
+- Für Wiederverwendung wird aktuell ein pauschaler Faktor `REUSE_FACTOR = 0.95` genutzt. Damit wird ein Abschlag von 5 % für Aufarbeitung, Reinigung und Vorbereitung angesetzt.
+- Die Transportberechnung nutzt Demo-Emissionsfaktoren je Fahrzeugkilometer und Demo-Nutzlasten aus dem Block `TRANSPORT`.
+- Bei der Transportberechnung wird die erforderliche Fahrtenzahl aus Gesamtmasse und Nutzlast abgeschätzt.
+- Die Option „Leere Rückfahrt mitrechnen“ verdoppelt die eingegebene einfache Strecke für die Transportemissionen.
+- Die angezeigten PKW-Kilometer dienen nur der Anschaulichkeit.
 
-```js
-REUSE_FACTOR = 0.95
-```
+## Grenzen des Tools
 
-Das bedeutet: Für Aufarbeitung, Reinigung und Vorbereitung wird pauschal ein Abschlag von 5 % auf die vermiedenen Emissionen angesetzt.
+- Das Tool ersetzt keine vollständige Gebäudeökobilanz.
+- Das Tool ersetzt keine prüffähige Zertifizierung oder projektspezifische Fachprüfung.
+- Die aktuellen Demo-Werte sind nicht für fachliche Nachweise geeignet.
+- Projektspezifische Themen wie Rückbau, Qualitätsprüfung, Schadstoffe, Lagerung, Montage, Verluste oder detaillierte Lebenszyklusmodule werden nicht vollständig abgebildet.
 
-Diese Annahme ist eine vereinfachte Pauschale und muss vor einer Veröffentlichung mit verifizierten Daten fachlich geprüft werden.
+## Deployment
 
-## Deployment mit GitHub Pages
+Das Tool wird als statische GitHub-Pages-Anwendung bereitgestellt.
 
-Die Anwendung liegt als `index.html` im Repository. Dadurch kann GitHub Pages die Datei direkt als statische Website ausliefern.
+Das Tool benötigt keinen Build-Schritt. Es kann über GitHub Pages direkt aus `index.html` bereitgestellt werden.
 
-Es ist kein Build-Befehl erforderlich.
+## Lizenz
 
-## Technische Rahmenbedingungen
+Code: Apache-2.0.
 
-- Single-file-Tool in deutscher Sprache.
-- Keine externen Abhängigkeiten.
-- Keine Package Manager.
-- Keine Bundler oder Frameworks.
-- Keine Analytics.
-- Keine Cookies.
-- Keine externen Schriftarten.
+Daten: siehe jeweilige Quellen- und Datenhinweise.
 
-## Rechtlicher und organisatorischer Hinweis
+## Kontakt
 
-Das Re-Use-Toolkit ist ein unabhängiges SURAP/BauMaB-Werkzeug und keine offizielle Anwendung des BMWSB oder BBSR.
+SURAP GmbH  
+https://www.surap.de

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Re-Use-Toolkit — Was spart Wiederverwendung von Bauteilen?</title>
+<meta name="description" content="CO₂-Ersparnis gebrauchter Bauteile berechnen und prüfen, ab welcher Transportdistanz sich Wiederverwendung noch lohnt. Kostenlos, direkt im Browser." />
+<style>
+  :root {
+    --bg: #F3F4F1; --card: #FFFFFF; --ink: #191A17; --muted: #6E7069;
+    --line: #E4E4DE; --accent: #0E7C66; --accent-2: #15947B; --bad: #B4552D;
+    --bad-2: #C9683F; --warn: #9A6B00;
+    --shadow: 0 1px 2px rgba(20,22,18,0.06), 0 10px 30px rgba(20,22,18,0.07);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; padding: 24px 16px 56px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.8px; margin: 0; }
+  .sub { color: var(--muted); font-size: 14.5px; margin: 6px 0 4px; line-height: 1.5; }
+  .demo-banner {
+    margin: 16px 0 18px; padding: 11px 14px; border: 1px solid #EAD9A8;
+    border-radius: 12px; color: var(--warn); font-size: 13px; background: #FBF6E8;
+    line-height: 1.5;
+  }
+  .tabs {
+    display: flex; gap: 4px; margin-bottom: 16px; background: #E9EAE5;
+    padding: 4px; border-radius: 999px;
+  }
+  .tab {
+    flex: 1; padding: 10px 12px; border: none; background: transparent;
+    border-radius: 999px; font: inherit; font-size: 14px; font-weight: 600;
+    cursor: pointer; color: var(--muted); transition: background 150ms ease, color 150ms ease;
+  }
+  .tab.active { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(20,22,18,0.12); }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 18px;
+    padding: 18px; box-shadow: var(--shadow);
+  }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  select, input[type="number"] {
+    font: inherit; font-size: 15px; padding: 11px 12px; border: 1.5px solid var(--line);
+    border-radius: 12px; background: var(--card); color: var(--ink); width: 100%;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+  }
+  select:focus, input:focus {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(14,124,102,0.18);
+  }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .result {
+    margin-top: 16px; border: none; border-radius: 16px; padding: 18px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff; box-shadow: 0 10px 28px rgba(14,124,102,0.28);
+  }
+  .result:has(.big.neg) {
+    background: linear-gradient(135deg, var(--bad), var(--bad-2));
+    box-shadow: 0 10px 28px rgba(180,85,45,0.28);
+  }
+  .result .big {
+    font-family: ui-monospace, Menlo, monospace; font-size: 34px; font-weight: 700;
+    letter-spacing: -1px;
+  }
+  .result .big.neg { color: #fff; }
+  .result .lbl { font-size: 13px; opacity: 0.85; margin-top: 2px; }
+  .equiv { margin-top: 10px; font-size: 14px; }
+  .note { margin-top: 12px; font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+  .cert-tease {
+    margin-top: 16px; padding: 14px; border: 1px solid var(--line);
+    border-radius: 14px; font-size: 13px; line-height: 1.6; background: #F7F8F5;
+  }
+  .cert-tease a {
+    display: inline-block; margin-top: 6px; color: var(--accent); font-weight: 700;
+    text-decoration: none;
+  }
+  .cert-tease a:hover { text-decoration: underline; }
+  .distance-viz { margin-top: 16px; }
+  .dviz-bar {
+    position: relative; height: 14px; border-radius: 999px; overflow: visible;
+    background: linear-gradient(90deg, rgba(255,255,255,0.85) 0 var(--split, 60%), rgba(25,26,23,0.35) var(--split, 60%) 100%);
+  }
+  .dviz-marker {
+    position: absolute; top: -5px; bottom: -5px; width: 4px; background: var(--ink);
+    left: var(--pos, 30%); border-radius: 2px; box-shadow: 0 0 0 2px rgba(255,255,255,0.7);
+  }
+  .dviz-labels { display: flex; justify-content: space-between; font-size: 11.5px; opacity: 0.9; margin-top: 7px; }
+  .hidden { display: none; }
+  footer { margin-top: 28px; font-size: 12px; color: var(--muted); line-height: 1.7; }
+  footer a { color: var(--accent); }
+  .tab:focus-visible, a:focus-visible, input[type="checkbox"]:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { .tab { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Re-Use-Toolkit</h1>
+  <p class="sub">Was spart die Wiederverwendung von Bauteilen — und lohnt sie sich auch mit Transport?</p>
+  <div class="demo-banner">⚠ Demo-Daten: Alle Kennwerte sind Platzhalter in realistischer Größenordnung (GWP-fossil, A1–A3). Vor Veröffentlichung durch geprüfte ÖKOBAUDAT-Datensätze ersetzen (Block <code>COMPONENTS</code> / <code>TRANSPORT</code> im Quelltext).</div>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-save">Ersparnis</button>
+    <button class="tab" id="tab-transport">Lohnt der Transport?</button>
+  </div>
+
+  <div class="card">
+    <div class="field">
+      <label for="comp">Bauteil</label>
+      <select id="comp"></select>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="qty">Menge</label>
+        <input type="number" id="qty" min="0" step="any" value="1" />
+      </div>
+      <div class="field hidden" id="unit-hint-wrap">
+        <label>&nbsp;</label>
+        <div class="note" id="unit-hint"></div>
+      </div>
+    </div>
+
+    <!-- Nur im Transport-Modus -->
+    <div id="transport-fields" class="hidden">
+      <div class="row2">
+        <div class="field">
+          <label for="dist">Entfernung (einfach) [km]</label>
+          <input type="number" id="dist" min="0" step="10" value="50" />
+        </div>
+        <div class="field">
+          <label for="vehicle">Fahrzeug</label>
+          <select id="vehicle"></select>
+        </div>
+      </div>
+      <div class="field">
+        <label><input type="checkbox" id="roundtrip" checked /> Leere Rückfahrt mitrechnen (Hin- und Rückweg)</label>
+      </div>
+    </div>
+
+    <div class="result" id="result"></div>
+    <div class="note" id="method-note"></div>
+    <div class="cert-tease">
+      <strong>Prüffähiges CO₂-Zertifikat für dieses Bauteil?</strong><br>
+      Mit geprüften Datensätzen, Nachweiskette und eindeutiger Zertifikats-ID — in Vorbereitung bei SURAP.
+      <a href="mailto:info@surap.de?subject=Interesse%20CO2-Zertifikate%20Re-Use">Interesse melden →</a>
+    </div>
+  </div>
+
+  <footer>
+    Annahme: Wiederverwendung vermeidet die Neuproduktion; pauschal 5&nbsp;% Abschlag für Aufarbeitung und Reinigung.
+    Gebrauchte Bauteile in Nordhessen: <a href="https://baumab-kassel.de" target="_blank" rel="noopener">Bauteilbörse Kassel (BauMaB)</a>.
+    Methodik: <a href="https://www.surap.de" target="_blank" rel="noopener">SURAP GmbH</a>. Keine Gewähr — ersetzt keine vollständige Ökobilanz.
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+// ============================================================
+// DEMO-DATEN — vor Veröffentlichung durch ÖKOBAUDAT ersetzen!
+// gwpNew: GWP-fossil der Neuproduktion (A1–A3) [kg CO2-Äqu./Einheit]
+// mass:   Masse [kg/Einheit] (für Transport)
+// unit:   "Stück" | "m²" | "m³" | "lfm" — basis beschreibt die Annahme
+// ============================================================
+const COMPONENTS = [
+  { id: "tuer-innen",  cat: "Türen & Fenster", name: "Zimmertür Holz, komplett (Demo)",        unit: "Stück", basis: "inkl. Zarge",            mass: 25,   gwpNew: 40 },
+  { id: "tuer-haus",   cat: "Türen & Fenster", name: "Haustür (Demo)",                          unit: "Stück", basis: "",                       mass: 60,   gwpNew: 120 },
+  { id: "fenster-holz",cat: "Türen & Fenster", name: "Holzfenster (Demo)",                      unit: "Stück", basis: "ca. 1,3 × 1,4 m",        mass: 45,   gwpNew: 90 },
+  { id: "fenster-kunst",cat:"Türen & Fenster", name: "Kunststofffenster (Demo)",                unit: "Stück", basis: "ca. 1,3 × 1,4 m",        mass: 40,   gwpNew: 130 },
+  { id: "ziegel",      cat: "Mauerwerk & Dach", name: "Vollziegel, einzeln (Demo)",             unit: "Stück", basis: "Normalformat",           mass: 3.5,  gwpNew: 0.6 },
+  { id: "mauerwerk",   cat: "Mauerwerk & Dach", name: "Vollziegel-Mauerwerk (Demo)",            unit: "m³",    basis: "inkl. Fugenanteil",      mass: 1700, gwpNew: 290 },
+  { id: "dachziegel",  cat: "Mauerwerk & Dach", name: "Dachziegel (Demo)",                      unit: "m²",    basis: "ca. 12 Ziegel je m²",    mass: 40,   gwpNew: 9 },
+  { id: "pflaster",    cat: "Mauerwerk & Dach", name: "Betonpflaster (Demo)",                   unit: "m²",    basis: "bei 8 cm Steindicke",    mass: 130,  gwpNew: 14 },
+  { id: "kvh",         cat: "Holz & Stahl",     name: "Konstruktionsholz 10×20 cm (Demo)",      unit: "lfm",   basis: "Querschnitt 10 × 20 cm", mass: 9.2,  gwpNew: 3.8 },
+  { id: "traeger",     cat: "Holz & Stahl",     name: "Stahlträger IPE 200 (Demo)",             unit: "lfm",   basis: "22,4 kg je lfm",         mass: 22.4, gwpNew: 40 },
+  { id: "parkett",     cat: "Holz & Stahl",     name: "Parkett Eiche (Demo)",                   unit: "m²",    basis: "bei 22 mm Dicke",        mass: 15,   gwpNew: 12 },
+  { id: "waschbecken", cat: "Sanitär & Technik", name: "Waschbecken Keramik (Demo)",            unit: "Stück", basis: "",                       mass: 15,   gwpNew: 25 },
+  { id: "wc",          cat: "Sanitär & Technik", name: "WC Keramik (Demo)",                     unit: "Stück", basis: "",                       mass: 25,   gwpNew: 40 },
+  { id: "heizkoerper", cat: "Sanitär & Technik", name: "Heizkörper Stahl (Demo)",               unit: "Stück", basis: "Typ 22, ca. 1,0 m",      mass: 30,   gwpNew: 60 },
+];
+
+// Fahrzeuge: kg CO2-Äqu. pro Fahrzeug-km (Demo), Nutzlast [kg]
+const TRANSPORT = [
+  { id: "pkw",         name: "PKW mit Anhänger (Demo)",   perKm: 0.20, payload: 500 },
+  { id: "transporter", name: "Transporter 3,5 t (Demo)",  perKm: 0.25, payload: 1200 },
+  { id: "lkw75",       name: "LKW 7,5 t (Demo)",          perKm: 0.50, payload: 3500 },
+];
+
+const REUSE_FACTOR = 0.95;         // 5 % Abschlag für Aufarbeitung
+const CAR_KM_EQUIV = 0.15;         // kg CO2-Äqu. pro PKW-km (Demo, für Anschaulichkeit)
+
+const byId = Object.fromEntries(COMPONENTS.map((c) => [c.id, c]));
+const vehById = Object.fromEntries(TRANSPORT.map((v) => [v.id, v]));
+const fmt = (v, dec) => v.toLocaleString("de-DE", { minimumFractionDigits: dec ?? 0, maximumFractionDigits: dec ?? 0 });
+
+// Auswahllisten füllen
+document.getElementById("comp").innerHTML = [...new Set(COMPONENTS.map((c) => c.cat))]
+  .map((cat) =>
+    `<optgroup label="${cat}">` +
+    COMPONENTS.filter((c) => c.cat === cat).map((c) => `<option value="${c.id}">${c.name}</option>`).join("") +
+    `</optgroup>`
+  ).join("");
+document.getElementById("vehicle").innerHTML =
+  TRANSPORT.map((v) => `<option value="${v.id}" ${v.id === "transporter" ? "selected" : ""}>${v.name}</option>`).join("");
+
+let mode = "save";
+
+function render() {
+  const c = byId[document.getElementById("comp").value];
+  const qty = Math.max(0.01, +document.getElementById("qty").value || 1);
+  const savings = c.gwpNew * REUSE_FACTOR * qty;
+
+  // Mengenfeld nach Einheit beschriften, Annahme anzeigen
+  const qtyLabels = { "Stück": "Anzahl [Stück]", "m²": "Fläche [m²]", "m³": "Volumen [m³]", "lfm": "Länge [lfm]" };
+  document.querySelector('label[for="qty"]').textContent = qtyLabels[c.unit] || "Menge";
+  const unitHint = document.getElementById("unit-hint-wrap");
+  unitHint.classList.toggle("hidden", !c.basis);
+  document.getElementById("unit-hint").textContent = c.basis ? "Annahme: " + c.basis : "";
+
+  const resEl = document.getElementById("result");
+  const noteEl = document.getElementById("method-note");
+
+  if (mode === "save") {
+    const carKm = savings / CAR_KM_EQUIV;
+    resEl.innerHTML = `
+      <div class="big">−${fmt(savings, savings < 10 ? 1 : 0)} kg CO₂</div>
+      <div class="lbl">vermiedene Emissionen gegenüber Neukauf (GWP-fossil, A1–A3)</div>
+      <div class="equiv">Das entspricht etwa <strong>${fmt(carKm)} km Autofahrt</strong>.</div>`;
+    noteEl.textContent = "Gesamtmasse: " + fmt(c.mass * qty) + " kg. Transportemissionen sind hier nicht berücksichtigt — dafür gibt es den zweiten Reiter.";
+  } else {
+    const v = vehById[document.getElementById("vehicle").value];
+    const dist = Math.max(0, +document.getElementById("dist").value || 0);
+    const roundtrip = document.getElementById("roundtrip").checked;
+    const totalMass = c.mass * qty;
+    const trips = Math.max(1, Math.ceil(totalMass / v.payload));
+    const kmFactor = roundtrip ? 2 : 1;
+    const transportCO2 = dist * kmFactor * v.perKm * trips;
+    const net = savings - transportCO2;
+    const breakEven = (savings / (v.perKm * trips)) / kmFactor;
+
+    const pos = breakEven > 0 ? Math.min(100, (dist / (breakEven * 1.5)) * 100) : 100;
+    const split = Math.min(100, (breakEven / (breakEven * 1.5)) * 100);
+
+    resEl.innerHTML = `
+      <div class="big ${net < 0 ? "neg" : ""}">${net >= 0 ? "−" : "+"}${fmt(Math.abs(net), Math.abs(net) < 10 ? 1 : 0)} kg CO₂</div>
+      <div class="lbl">${net >= 0 ? "Netto-Ersparnis trotz Transport" : "Netto-Mehremission — Transport frisst die Ersparnis auf"}</div>
+      <div class="equiv">Ersparnis ${fmt(savings)} kg − Transport ${fmt(transportCO2, transportCO2 < 10 ? 1 : 0)} kg
+        (${trips} Fahrt${trips > 1 ? "en" : ""}, ${roundtrip ? "inkl. Rückweg" : "nur Hinweg"})</div>
+      <div class="distance-viz">
+        <div class="dviz-bar" style="--split:${split}%"><div class="dviz-marker" style="--pos:${pos}%"></div></div>
+        <div class="dviz-labels"><span>0 km</span><span>Break-Even: <strong>${fmt(breakEven)} km</strong></span><span>${fmt(breakEven * 1.5)} km</span></div>
+      </div>`;
+    noteEl.textContent = "Bis " + fmt(breakEven) + " km (einfache Strecke) bleibt die Wiederverwendung klimapositiv. Tipp: Je voller das Fahrzeug, desto weiter lohnt sich der Weg — Sammelfahrten rechnen sich fast immer.";
+  }
+}
+
+function setMode(m) {
+  mode = m;
+  document.getElementById("tab-save").classList.toggle("active", m === "save");
+  document.getElementById("tab-transport").classList.toggle("active", m === "transport");
+  document.getElementById("transport-fields").classList.toggle("hidden", m !== "transport");
+  render();
+}
+
+document.getElementById("tab-save").addEventListener("click", () => setMode("save"));
+document.getElementById("tab-transport").addEventListener("click", () => setMode("transport"));
+["comp", "qty", "dist", "vehicle", "roundtrip"].forEach((id) =>
+  document.getElementById(id).addEventListener("input", render));
+
+render();
+</script>
+</body>
+</html>

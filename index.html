@@ -46,7 +46,7 @@ limitations under the License.
   :root {
     --bg: #F3F4F1; --card: #FFFFFF; --ink: #191A17; --muted: #6E7069;
     --line: #E4E4DE; --accent: #0E7C66; --accent-2: #15947B; --bad: #B4552D;
-    --bad-2: #C9683F; --warn: #9A6B00;
+    --bad-2: #C9683F; --warn: #9A6B00; --info: #245C73;
     --shadow: 0 1px 2px rgba(20,22,18,0.06), 0 10px 30px rgba(20,22,18,0.07);
   }
   * { box-sizing: border-box; }
@@ -55,9 +55,29 @@ limitations under the License.
     font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; padding: 24px 16px 56px;
     -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 640px; margin: 0 auto; }
-  h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.8px; margin: 0; }
-  .sub { color: var(--muted); font-size: 14.5px; margin: 6px 0 4px; line-height: 1.5; }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  .topline {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    margin-bottom: 16px;
+  }
+  .brand { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .status {
+    display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px;
+    border-radius: 999px; border: 1px solid #D9CAB3; background: #FFF8EC;
+    color: #75520C; font-size: 12px; font-weight: 700; white-space: nowrap;
+  }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); }
+  h1 { font-size: clamp(32px, 6vw, 56px); font-weight: 850; letter-spacing: 0; line-height: 0.96; margin: 0; }
+  .sub { color: var(--muted); font-size: 16px; margin: 12px 0 0; line-height: 1.55; max-width: 620px; }
+  .summary {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 18px 0;
+  }
+  .summary-item {
+    border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,0.62);
+    padding: 12px;
+  }
+  .summary-kicker { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .summary-value { margin-top: 6px; font-size: 14px; font-weight: 750; line-height: 1.3; }
   .demo-banner {
     margin: 16px 0 18px; padding: 11px 14px; border: 1px solid #EAD9A8;
     border-radius: 12px; color: var(--warn); font-size: 13px; background: #FBF6E8;
@@ -106,6 +126,14 @@ limitations under the License.
   .result .lbl { font-size: 13px; opacity: 0.85; margin-top: 2px; }
   .equiv { margin-top: 10px; font-size: 14px; }
   .note { margin-top: 12px; font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+  .context {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;
+  }
+  .context-box {
+    border: 1px solid var(--line); border-radius: 14px; background: #F7F8F5;
+    padding: 14px; font-size: 13px; line-height: 1.55; color: var(--muted);
+  }
+  .context-box strong { display: block; margin-bottom: 5px; color: var(--ink); font-size: 13px; }
   .cert-tease {
     margin-top: 16px; padding: 14px; border: 1px solid var(--line);
     border-radius: 14px; font-size: 13px; line-height: 1.6; background: #F7F8F5;
@@ -129,13 +157,39 @@ limitations under the License.
   footer { margin-top: 28px; font-size: 12px; color: var(--muted); line-height: 1.7; }
   footer a { color: var(--accent); }
   .tab:focus-visible, a:focus-visible, input[type="checkbox"]:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+  @media (max-width: 680px) {
+    .topline { align-items: flex-start; flex-direction: column; }
+    .summary, .context { grid-template-columns: 1fr; }
+    .row2 { grid-template-columns: 1fr; }
+    h1 { font-size: 40px; }
+  }
   @media (prefers-reduced-motion: reduce) { .tab { transition: none; } }
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="topline">
+    <div class="brand">SURAP Open Source Tools</div>
+    <div class="status"><span class="status-dot"></span>Public-Beta-Demo</div>
+  </div>
   <h1>Re-Use-Toolkit</h1>
-  <p class="sub">Was spart die Wiederverwendung von Bauteilen — und lohnt sie sich auch mit Transport?</p>
+  <p class="sub">Überschlägiger Rechner für die CO₂-Wirkung wiederverwendeter Bauteile und die Frage, ab welcher Transportdistanz der Vorteil kippt.</p>
+
+  <div class="summary" aria-label="Kurzüberblick">
+    <div class="summary-item">
+      <div class="summary-kicker">Status</div>
+      <div class="summary-value">technisch testbar, fachlich noch Demo</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-kicker">Fokus</div>
+      <div class="summary-value">A1-A3-Vermeidung plus Transport</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-kicker">Betrieb</div>
+      <div class="summary-value">statische HTML-Datei, kein Build</div>
+    </div>
+  </div>
+
   <div class="demo-banner">⚠ Demo-Daten: Alle Kennwerte sind Platzhalter in realistischer Größenordnung (GWP-fossil, A1–A3). Vor Veröffentlichung durch geprüfte ÖKOBAUDAT-Datensätze ersetzen (Block <code>COMPONENTS</code> / <code>TRANSPORT</code> im Quelltext).</div>
 
   <div class="tabs">
@@ -178,6 +232,16 @@ limitations under the License.
 
     <div class="result" id="result"></div>
     <div class="note" id="method-note"></div>
+    <div class="context">
+      <div class="context-box">
+        <strong>Methodik</strong>
+        Wiederverwendung vermeidet rechnerisch Neuproduktion. Für Aufarbeitung und Reinigung wird pauschal ein Abschlag von 5&nbsp;% angesetzt.
+      </div>
+      <div class="context-box">
+        <strong>Datenstatus</strong>
+        Die Bauteil- und Transportkennwerte sind Demo-Werte und nicht als geprüfte ÖKOBAUDAT-Daten zu verwenden.
+      </div>
+    </div>
     <div class="cert-tease">
       <strong>Prüffähiges CO₂-Zertifikat für dieses Bauteil?</strong><br>
       Mit geprüften Datensätzen, Nachweiskette und eindeutiger Zertifikats-ID — in Vorbereitung bei SURAP.
